@@ -1,9 +1,9 @@
 <?php
 require_once dirname(__FILE__).'/GAP_Base32Conversor.php';
-require_once dirname(__FILE__).'/GAP_HOTPGenerator.php';
+require_once dirname(__FILE__).'/GAP_TOTPGenerator.php';
 
 /**
- * This class generates HOTP codes, ready to be used with Google Authenticator
+ * This class generates TOTP codes, ready to be used with Google Authenticator
  * mobile clients. Use it in your websites to offer 2-step authentication.
  * 
  * See http://goo.gl/dfszH
@@ -20,7 +20,7 @@ class GAP_Authenticator {
 	private $base32conversor = NULL;
 
 	/**
-	 * @var GAP_HOTPGenerator
+	 * @var GAP_TOTPGenerator
 	 */
 	private $hotpGenerator = NULL;
 
@@ -31,7 +31,7 @@ class GAP_Authenticator {
 	 * in tests) or builds the defaults.
 	 *
 	 * @param GAP_Base32Conversor $base32conversor
-	 * @param GAP_HOTPGenerator $hotpGenerator
+	 * @param GAP_TOTPGenerator $hotpGenerator
 	 */
 	public function __construct($base32conversor = NULL, $hotpGenerator = NULL) {
 		if ($base32conversor === NULL) {
@@ -39,13 +39,13 @@ class GAP_Authenticator {
 		}
 		$this->base32conversor = $base32conversor;
 		if ($hotpGenerator === NULL) {
-			$hotpGenerator = new GAP_HOTPGenerator();
+			$hotpGenerator = new GAP_TOTPGenerator();
 		}
 		$this->hotpGenerator = $hotpGenerator;
 	}
 
 	/**
-	 * Checks if a HOTP code is correct
+	 * Checks if a TOTP code is correct
 	 *
 	 * The client provides the code by using some mobile app like:
 	 * http://goo.gl/dfszH
@@ -56,16 +56,16 @@ class GAP_Authenticator {
 	 *
 	 * @param integer $code Code provided by the user
 	 * @param string $key Base32 string containing the secret key
-	 * @param integer $timestamp Timestamp to use for HOTP code, current time by default
+	 * @param integer $timestamp Timestamp to use for TOTP code, current time by default
 	 * @return boolean
 	 * @throws GAP_InvalidSecretKey if the key is not valid
 	 */
-	public function checkHOTPCode($code, $key, $timestamp = NULL) {
+	public function checkTOTPCode($code, $key, $timestamp = NULL) {
 		$rawKey = $this->getRawKey($key);
 		$challenge = $this->getChallenge($timestamp);
 
 		for ($i = -1; $i <= 1; $i++) {
-			if ($code == $this->getHOTPGenerator()->getHOTPCode($rawKey, $challenge + $i)) {
+			if ($code == $this->getTOTPGenerator()->getTOTPCode($rawKey, $challenge + $i)) {
 				return TRUE;
 			}
 		}
@@ -73,22 +73,22 @@ class GAP_Authenticator {
 	}
 
 	/**
-	 * Generates a HOTP code
+	 * Generates a TOTP code
 	 *
 	 * Tipically this is done at the client, never at the server. This
 	 * is mainly for demo purposes, or if you want to use PHP as client
-	 * program to generate HOTP codes.
+	 * program to generate TOTP codes.
 	 *
 	 * @param string $key Base32 string containing the secret key
-	 * @param integer $timestamp Timestamp to use for HOTP code, current time by default
-	 * @return integer HOTP Code
+	 * @param integer $timestamp Timestamp to use for TOTP code, current time by default
+	 * @return integer TOTP Code
 	 * @throws GAP_InvalidSecretKey if the key is not valid
 	 */
-	public function getHOTPCode($key, $timestamp = NULL) {
+	public function getTOTPCode($key, $timestamp = NULL) {
 		$rawKey = $this->getRawKey($key);
 		$challenge = $this->getChallenge($timestamp);
 
-		return $this->getHOTPGenerator()->getHOTPCode($rawKey, $challenge);
+		return $this->getTOTPGenerator()->getTOTPCode($rawKey, $challenge);
 	}
 
 	/**
@@ -155,9 +155,9 @@ class GAP_Authenticator {
 	}
 
 	/**
-	 * @return GAP_HOTPGenerator
+	 * @return GAP_TOTPGenerator
 	 */
-	private function getHOTPGenerator() {
+	private function getTOTPGenerator() {
 		return $this->hotpGenerator;
 	}
 }

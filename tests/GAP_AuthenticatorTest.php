@@ -21,81 +21,81 @@ class GAP_AuthenticatorTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($auth->generateSecret(TRUE), 'TEST TEST TEST TEST ');
 	}
 
-	public function testCheckValidHOTPCode() {
+	public function testCheckValidTOTPCode() {
 		$base32 = new GAP_Base32Conversor();
 		$key = 'TESTTESTTESTTEST';
 		$rawKey = $base32->base32decode($key);
 		$challenge = (int) (time()/GAP_Authenticator::TIMESTAMP_GRANULARITY);
 
-		$hotpGenerator = $this->getMock('GAP_HOTPGenerator');
+		$hotpGenerator = $this->getMock('GAP_TOTPGenerator');
 		$hotpGenerator->expects($this->once())
-						->method('getHOTPCode')
+						->method('getTOTPCode')
 						->with($this->equalTo($rawKey), $this->equalTo($challenge, 1))
 						->will($this->returnValue(123));
 		$auth = new GAP_Authenticator(NULL, $hotpGenerator);
-		$this->assertEquals($auth->checkHOTPCode(123, $key), TRUE);
+		$this->assertEquals($auth->checkTOTPCode(123, $key), TRUE);
 	}
 
-	public function testCheckInvalidHOTPCode() {
+	public function testCheckInvalidTOTPCode() {
 		$base32 = new GAP_Base32Conversor();
 		$key = 'TESTTESTTESTTEST';
 		$rawKey = $base32->base32decode($key);
 		$timestamp = 30000;
 		$challenge = (int) ($timestamp / GAP_Authenticator::TIMESTAMP_GRANULARITY);
 
-		$hotpGenerator = $this->getMock('GAP_HOTPGenerator');
+		$hotpGenerator = $this->getMock('GAP_TOTPGenerator');
 		$hotpGenerator->expects($this->at(0))
-						->method('getHOTPCode')
+						->method('getTOTPCode')
 						->with($this->equalTo($rawKey), $this->equalTo($challenge-1))
 						->will($this->returnValue(123));
 		$hotpGenerator->expects($this->at(1))
-						->method('getHOTPCode')
+						->method('getTOTPCode')
 						->with($this->equalTo($rawKey), $this->equalTo($challenge))
 						->will($this->returnValue(123));
 		$hotpGenerator->expects($this->at(2))
-						->method('getHOTPCode')
+						->method('getTOTPCode')
 						->with($this->equalTo($rawKey), $this->equalTo($challenge+1))
 						->will($this->returnValue(123));
 		$auth = new GAP_Authenticator(NULL, $hotpGenerator);
-		$this->assertEquals($auth->checkHOTPCode(321, $key, $timestamp), FALSE);
+		$this->assertEquals($auth->checkTOTPCode(321, $key, $timestamp), FALSE);
 	}
 
-	public function testCheckHOTPCodeWithInvalidKey() {
+	public function testCheckTOTPCodeWithInvalidKey() {
 		$timestamp = 30000;
 
 		$auth = new GAP_Authenticator();
 
 		try {
 			$key = 'Wrong key 999';
-			$auth->checkHOTPCode(321, $key, $timestamp);
-			var_dump($auth->checkHOTPCode(321, $key, $timestamp));
-			$this->fail('checkHOTP should throw exception with wrong key');
+			$auth->checkTOTPCode(321, $key, $timestamp);
+			var_dump($auth->checkTOTPCode(321, $key, $timestamp));
+			$this->fail('checkTOTP should throw exception with wrong key');
 		} catch (GAP_InvalidSecretKey $e) {
 			$this->assertEquals($e->getMessage(), 'Invalid secret key: '.$key);
 		}
 
 		try {
 			$key = 'TEST';
-			$auth->checkHOTPCode(321, $key, $timestamp);
-			var_dump($auth->checkHOTPCode(321, $key, $timestamp));
-			$this->fail('checkHOTP should throw exception with wrong key');
+			$auth->checkTOTPCode(321, $key, $timestamp);
+			var_dump($auth->checkTOTPCode(321, $key, $timestamp));
+			$this->fail('checkTOTP should throw exception with wrong key');
 		} catch (GAP_InvalidSecretKey $e) {
 			$this->assertEquals($e->getMessage(), 'Secret key is too short: '.$key);
 		}
 	}
 
-	public function testGetHOTPCode() {
+	public function testGetTOTPCode() {
 		$base32 = new GAP_Base32Conversor();
 		$key = 'TEST TEST TEST TEST';
 		$rawKey = $base32->base32decode($key);
 		$challenge = (int) (time()/GAP_Authenticator::TIMESTAMP_GRANULARITY);
 
-		$hotpGenerator = $this->getMock('GAP_HOTPGenerator');
+		$hotpGenerator = $this->getMock('GAP_TOTPGenerator');
 		$hotpGenerator->expects($this->once())
-						->method('getHOTPCode')
+						->method('getTOTPCode')
 						->with($this->equalTo($rawKey), $this->equalTo($challenge, 1))
 						->will($this->returnValue(123));
 		$auth = new GAP_Authenticator(NULL, $hotpGenerator);
-		$this->assertEquals($auth->getHOTPCode($key), 123);
+		$this->assertEquals($auth->getTOTPCode($key), 123);
 	}
 }

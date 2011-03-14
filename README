@@ -10,8 +10,9 @@ just with a different secret code for your website.
 You can download client applications for your mobile from
 [here](http://goo.gl/dfszH).
 
-The implementation is a simple & standard HOTP (HMAC-based One Time
-Password algorithm) as defined in IETF RFC 4226.
+For now just TOTP codes are implemented, following the draft
+Time-based One-time Password Algorithm:
+http://tools.ietf.org/html/draft-mraihi-totp-timebased-00
 
 Usage
 -----
@@ -36,25 +37,25 @@ the setup. If there is a way to see it later, any attacker will be
 able to steal the secret at a later time, without being noticed,
 and that makes 2-step authentication useless.
 
-After displaying it to the user, it's recommended to ask for a HOTP
+After displaying it to the user, it's recommended to ask for a TOTP
 token for confirmation, to ensure the user has received the key correctly.
 Once the secret is stored associated to the user session, he might not
 be able to login anymore.
 
-### 2. Checking HOTP codes:
+### 2. Checking TOTP codes:
 
-Once the user enters a valid email and password and has enabled HOTP,
+Once the user enters a valid email and password and has enabled TOTP,
 we will request a extra authentication step: a One Time Password code.
 
 The mobile device of the user, previously configured with the secret
-key will generate a HOTP code.
+key will generate a TOTP code.
 
 To check the code back in the server, you simply need to:
 
     require_once 'path/to/GAP_Authenticator.php';
 
     $gap = new GAP_Authenticator();
-    $validCode = $gap->checkHOTPCode($code, $key);
+    $validCode = $gap->checkTOTPCode($code, $key);
 
 The codes change every 30 seconds, but the authentication allows to use
 the adjacent codes, to allow some clock skew between client and
@@ -66,8 +67,8 @@ code and finally arrives to the server).
 If you want to make your site really secure, please also consider some
 of this recommendations:
 
-* For security, it's recommended to store the HOTP secret key crypted
-with the password of the user. Reseting HOTP codes is a really cumbersome
+* For security, it's recommended to store the TOTP secret key crypted
+with the password of the user. Reseting TOTP codes is a really cumbersome
 for users.
 * You should also try to avoid storing unsalted hashes of the passwords
 in your database. Even better is to use some computational expensive
@@ -79,10 +80,10 @@ usage simple, so brute force can be an option for attackers.
 Contributing
 ------------
 
-Any contribution is welcomed. I have plans to add more advanced HOTPs
+Any contribution is welcomed. I have plans to add more advanced TOTPs
 in the future.
 
-Also since this is just a library for HOTP codes, and auth systems are
+Also since this is just a library for TOTP codes, and auth systems are
 deeply integrated into applications, this project is still far from
 being a drop in replacement in applications. Any implementations for
 some widely used frameworks like CakePHP, Zend, Wordpess... could
@@ -104,7 +105,7 @@ There are also some testing examples in `utils/` folder:
     * Random secret key:
         4QF5 SRS6 KQXR HFGU
 
-    $ ./util/gen_hotp_code '4QF5 SRS6 KQXR HFGU'
+    $ ./util/gen_totp_code '4QF5 SRS6 KQXR HFGU'
 
-    * HOTP code:
+    * TOTP code:
         535815
